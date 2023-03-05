@@ -92,8 +92,11 @@ folder, but now it's sitting somewhere else relative to the
 `imgui` project, so I know for sure I have to change something.
 
 The first line in the Makefile defines `EXE`. I change this name
-to `main` for compatibility with my Vim shortcuts/workflow. I
-copy the `example_sdl2_sdlrenderer/main.cpp` source to my `src`
+to `main` for compatibility with my [Vim shortcut to run the
+program](README-vim-shortcuts.md#run) (my shortcut looks for
+an executable file named `build/main`).
+
+I copy the `example_sdl2_sdlrenderer/main.cpp` source to my `src`
 folder:
 
 ```
@@ -103,7 +106,7 @@ cp imgui/examples/example_sdl2_sdlrenderer/main.cpp src/
 
 I make a bunch of little minor changes to the first few lines of
 the Dear ImGui Makefile to match the way I'm used to doing
-things:
+things in my Makefiles:
 
 ```
 SRC = src/main.cpp
@@ -121,7 +124,7 @@ build/main
 ```
 
 The Dear Imgui Makefile throws a lot of files into a variable
-name, specifically `SOURCES` and `OBJ`. So another useful quick
+name, specifically `SOURCES` and `OBJS`. So another useful quick
 one-liner is to check that all the files in the variable exist.
 
 I want to check they exist because I just messed up all the paths
@@ -220,11 +223,16 @@ think that this folder name is a prerequisite file for compiling
 or linking or whatever.
 
 Logically, I only need the `build` prerequisite in recipes that
-creates the relocatable object files. The Dear ImGui follows
-Makefile and C programming conventions: the object file recipes
-use the *pattern rule* syntax:
+creates the relocatable object files. Dear ImGui follows Makefile
+and C programming conventions: the object file recipes use the
+*pattern rule* syntax:
 
-*To build target `%.o`, use source `%.cpp`.*
+```
+%.o: %.cpp
+```
+
+That simply says "to build target `%.o`, use source `%.cpp`". The
+`%` can be just the file stem, or it can include directories.
 
 There are three such "pattern rule" recipes; add the `| build` to
 all of them:
@@ -243,7 +251,10 @@ all of them:
 ### Pattern rules
 
 But now I broke the pattern rules. Remember I changed the
-`$(OBJS)` (list of object files) to have prefix `build/`.
+`$(OBJS)` (list of object files) to have prefix `build/`. Take a
+file like `main.o`: `%.o` becomes `build/main.o`, which means the
+pattern rule `%.o:%.cpp` is looking for prerequisite
+`build/main.cpp`.
 
 Fix the pattern-match recipes so that the pattern matching is
 only done to the *file stem* (e.g., the `main` in
@@ -283,10 +294,17 @@ target 'build/blah.o'. Stop.`
 
 ### Build all
 
-That's it! The Dear ImGui Makefile is nice and straight-ahead
-with all the cross-platform goodies already setup.
+That's it! (It is daunting the first few times learning all the
+Makefile syntax, but after setting up lots of projects this all
+feels quite natural and intuitive).
 
-For my Vim shorcut/workflow, at the very top I add this:
+The Dear ImGui Makefile is nice and straight-ahead. And it
+already has all the cross-platform goodies setup for detecting OS
+to select the appropriate packages and flags.
+
+[My Vim build shorcut](README-vim-shortcuts.md#build) just calls
+`make` (then it does other stuff depending on whether there are
+any build errors), so at the very top I add this:
 
 ```
 default-target: all
