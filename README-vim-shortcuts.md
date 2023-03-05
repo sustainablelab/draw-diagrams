@@ -6,13 +6,14 @@ and run:
 - `;<Space>` to build:
     - call `make`
     - if there are build warnings/errors, open the Vim quickfix window
-- `;r<Space>` to run the build
-    - call `build/main` or `build/main.exe`
+    - if there are no build warnings/errors, run the program
+- `;r<Space>` to run the program
+    - call `build/main` (Linux) or `build/main.exe` (Windows)
 
 ## Build
 
 If the build goes fine, just print a little message at the Vim
-command line.
+command line and run the program.
 
 But if the build fails, I want Vim to open the *quickfix* window.
 

@@ -35,7 +35,7 @@ int main(int, char**)
 
     // Create window with SDL_Renderer graphics context
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL2+SDL_Renderer example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_Window* window = SDL_CreateWindow("Draw Diagrams", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     if (renderer == NULL)
     {
@@ -107,7 +107,12 @@ int main(int, char**)
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        Diagram::UI();
+        ////////////
+        // DOCKSPACE
+        ////////////
+        // Dock all windows in the main application window
+        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
@@ -144,6 +149,13 @@ int main(int, char**)
                 show_another_window = false;
             ImGui::End();
         }
+
+        /////////////
+        // MY WINDOWS -- put mine last to be default active tab (if tabbed)
+        /////////////
+        Diagram::UI();
+        Diagram::Debug();
+        done = done or Diagram::file_quit;
 
         // Rendering
         ImGui::Render();
