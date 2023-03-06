@@ -100,6 +100,20 @@ int main(int, char**)
                 done = true;
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                 done = true;
+            /////////////////////////
+            // ADD KEYBOARD SHORTCUTS
+            /////////////////////////
+            switch(event.type)
+            {
+                // e.key
+                case SDL_KEYDOWN:
+                    switch(event.key.keysym.sym)
+                    {
+                        // q : quit
+                        case SDLK_q: done=true; break;
+                    }
+                    break;
+            }
         }
 
         // Start the Dear ImGui frame

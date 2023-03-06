@@ -1,3 +1,7 @@
+/* *************TODO***************
+ * - [ ] What out-of-the-box functionality is in the ImDrawList API?
+ * - [ ] What out-of-the-box functionality is there for file handling?
+ * *******************************/
 #include "imgui.h"
 #include "diagram.h"
 
@@ -57,12 +61,27 @@ bool Diagram::file_quit = false;
 ////////////////////////
 // HELPERS FOR MY WINDOW
 ////////////////////////
+/**
+ * User "file" events triggered by clicking on menu.
+ *
+ * Move the bodies of these conditionals to functions in the Diagram namespace so that I
+ * can, in the event polling in src/main.cpp, generate keyboard shortcuts as well (in
+ * addition to the vanilla Ctrl+ keyboard shortcuts I define here).
+ */
 static void ShowMenuFile(void)
 { // Define the File menu
-    if (ImGui::MenuItem("New")) {}
+    if (ImGui::MenuItem("New", "Ctrl+N")) {}
     if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+    if (ImGui::MenuItem("Open", "Ctrl+O")) {}
     if (ImGui::MenuItem("Quit", "Alt+F4")) {Diagram::file_quit = true;}
 }
+/**
+ * User "edit" events triggered by Ctrl+Z and Ctrl+Y.
+ *
+ * Move the bodies of these conditionals to functions in the Diagram namespace so that I
+ * can, in the event polling in src/main.cpp, generate keyboard shortcuts as well (in
+ * addition to the vanilla Ctrl+ keyboard shortcuts I define here).
+ */
 static void ShowMenuEdit(void)
 { // Define the Edit menu
     if (ImGui::MenuItem("Undo", "Ctrl+Z")) {}
@@ -109,6 +128,21 @@ void Diagram::UI(void)
     ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar;
     ImGui::Begin("Draw Diagrams", &show_this_window, flags);
     ShowMenu();                                         // Add menu bar to this window
+    ///////
+    // LOAD - latest state of diagram
+    ///////
+    
+    /////////
+    // UPDATE - use user input to modify the diagram
+    /////////
+
+    ////////////
+    // TRANSFORM - map items from diagram space to window space
+    ////////////
+
+    /////////
+    // RENDER - list the items to draw
+    /////////
     ImDrawList* draw = ImGui::GetWindowDrawList();
     { // green box
         ImVec2 topL = {128.f,128.f}; ImVec2 botR = {384.0f,256.0f};
@@ -145,8 +179,12 @@ void Diagram::Debug(void)
     ImDrawList* draw = ImGui::GetWindowDrawList();
     ImGui::Text("%d:sizeof(ImDrawList* draw): %d bytes", __LINE__, (int)sizeof(draw));
     ImGuiViewport* vp = ImGui::GetWindowViewport();
+    ImGui::Text("ImGui::GetWindowViewport()->Size is x,y size of whole application window");
     ImGui::Text("%d:viewport top-left: (%.0f,%.0f)",__LINE__, vp->Pos.x, vp->Pos.y);
     ImGui::Text("%d:viewport size: %.0f x %.0f",__LINE__, vp->Size.x, vp->Size.y);
     ImGui::Text("%d:viewport bottom-right: (%.0f,%.0f)",__LINE__, vp->Pos.x+vp->Size.x, vp->Pos.y+vp->Size.y);
+    ImGui::Text("ImGui::GetWindowSize() returns size of THIS window");
+    ImVec2 window_size = ImGui::GetWindowSize();
+    ImGui::Text("%d:window size: %.0f x %.0f",__LINE__, window_size.x, window_size.y);
     ImGui::End();
 }
