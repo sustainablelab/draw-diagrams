@@ -103,3 +103,4 @@ tags: $(HEADER_LIST) build/ctags-dlist
 	build/ctags-dlist $(HEADER_LIST)
 	ctags --c-kinds=+p+x --extra=+q -L build/headers.txt
 	ctags -a --extra=+q $(SOURCES)
+	ctags -x --sort=n --totals=yes --c-kinds=+p+x --extra=+q $(SOURCES) > xtags.txt
