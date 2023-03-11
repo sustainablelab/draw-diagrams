@@ -2,7 +2,14 @@
 
 namespace Diagram
 {
-    extern bool file_quit;
-    void UI(void);
-    void Debug(void);
+    //////////////////////
+    // APPLICATION GLOBALS - defined in src/diagram.cpp
+    //////////////////////
+    extern bool file_quit;                              // Diagram::file_quit
+
+    ///////////////////////
+    // API for src/main.cpp
+    ///////////////////////
+    void UI(void);                                      // Diagram::UI()
+    void Debug(void);                                   // Diagram::Debug()
 }

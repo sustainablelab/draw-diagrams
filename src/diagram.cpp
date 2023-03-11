@@ -1,37 +1,28 @@
+/* *************Project Setup***************
+ * I use the Dear ImGui example main.cpp and treat my application like it's a library.
+ *
+ * This file, src/diagram.cpp, is my application.
+ *
+ *
+ * Most everything I need happens when the main.cpp calls Diagram::UI().
+ *
+ * There are a few variables I make visible to the Dear ImGui main.cpp so that my
+ * application (defined in Diagram::UI()) can affect the state of the program. I list
+ * these variables in APPLICATION GLOBALS.
+ *
+ * Diagram::UI() draws "my application" as a Dear ImGui window in the OS window.
+ * *******************************/
+/* *************Use Dear ImGui to draw stuff***************
+ * - See my notes on ImDrawList API in src/mg_draw.h
+ * *******************************/
 /* *************TODO***************
- * - [ ] What out-of-the-box functionality is in the ImDrawList API?
- * - [ ] What out-of-the-box functionality is there for file handling?
+ * - [ ] Experiment with out-of-the-box functionality for file handling:
  *   - ImFileOpen()
  *   - ImFileClose()
  *   - ImFileGetSize()
  *   - ImFileRead()
  *   - ImFileWrite()
  *   - ImFileLoadToMemory()
- * *******************************/
-/* *************Dear ImGui User Manual***************
- * The ImDrawList API:
- *
- *      ImDrawList* draw = ImGui::GetWindowDrawList();
- *      draw->AddLine(r.tl, bl, Colors::lime);
- *
- * Each imgui window contains its own ImDrawList. This is a list of draw commands.
- * Draw commands added to this list are rendered at the end of every frame.
- *
- * Dear ImGui provides a nice toolkit of drawing primitives. All drawing primitive API
- * calls start with `Add`, e.g., `AddText()`.
- *
- * See API list of Dear ImGui drawing primitives in:
- * - imgui/imgui.h
- *      - struct ImDrawList
- *          - // Primitives
- *          - // Image primitives
- *
- * Primitives:
- * - Text, Line, Rect, Quad, Triangle, Circle, Ngon, Polyline, ConvexPolyFilled,
- *   BezierQuadratic, BezierCubic
- *
- * Image primitives:
- * - Image, ImageQuad, ImageRounded
  * *******************************/
 #include "imgui.h"
 #include "diagram.h"
@@ -40,9 +31,9 @@
 constexpr bool DEBUG = true;
 
 
-//////////////////
-// DIAGRAM GLOBALS - declared in src/diagram.h
-//////////////////
+//////////////////////
+// APPLICATION GLOBALS - declared in src/diagram.h
+//////////////////////
 bool Diagram::file_quit = false;
 
 ////////////////////////
