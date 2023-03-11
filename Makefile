@@ -17,6 +17,8 @@
 default-target: all
 
 SRC = src/main.cpp
+MG_LIBS = $(wildcard src/*.h)
+what-MG_LIBS: ; @echo $(MG_LIBS)
 EXE = build/$(basename $(notdir $(SRC)))
 HEADER_LIST = build/$(basename $(notdir $(SRC))).d
 what-EXE: ; @echo $(EXE)
@@ -70,7 +72,7 @@ endif
 ## BUILD RULES
 ##---------------------------------------------------------------------
 
-build/%.o:src/%.cpp | build
+build/%.o:src/%.cpp $(MG_LIBS) | build
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 build/%.o:$(IMGUI_DIR)/%.cpp | build
