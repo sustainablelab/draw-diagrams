@@ -8,98 +8,37 @@
  *   - ImFileWrite()
  *   - ImFileLoadToMemory()
  * *******************************/
+/* *************Dear ImGui User Manual***************
+ * The ImDrawList API:
+ *
+ *      ImDrawList* draw = ImGui::GetWindowDrawList();
+ *      draw->AddLine(r.tl, bl, Colors::lime);
+ *
+ * Each imgui window contains its own ImDrawList. This is a list of draw commands.
+ * Draw commands added to this list are rendered at the end of every frame.
+ *
+ * Dear ImGui provides a nice toolkit of drawing primitives. All drawing primitive API
+ * calls start with `Add`, e.g., `AddText()`.
+ *
+ * See API list of Dear ImGui drawing primitives in:
+ * - imgui/imgui.h
+ *      - struct ImDrawList
+ *          - // Primitives
+ *          - // Image primitives
+ *
+ * Primitives:
+ * - Text, Line, Rect, Quad, Triangle, Circle, Ngon, Polyline, ConvexPolyFilled,
+ *   BezierQuadratic, BezierCubic
+ *
+ * Image primitives:
+ * - Image, ImageQuad, ImageRounded
+ * *******************************/
 #include "imgui.h"
 #include "diagram.h"
+#include "mg_colors.h"
+#include "mg_draw.h"
 constexpr bool DEBUG = true;
 
-typedef struct
-{
-    ImVec2 tl;
-    ImVec2 br;
-    ImVec2 sz;
-} Rect;
-
-/**
- * Get extents of the area I can draw in.
- *
- * \returns drawing area as Rect {ImVec2 topleft, ImVec2 botright} in screen coordinates
- *
- * This is the area left for drawing in. So if I call this before and after drawing stuff or
- * writing text in the window, I get different return values.
- *
- * Details using Dear ImGui API:
- *
- * ImDrawList API uses screen coordinates. Screen coordinates means 0,0 is top left of my
- * whole application window (the window I requested from the OS), regardless of where my
- * Dear ImGui window within my application window.
- * 
- * To get the remaining area available in the window:
- *
- * GetContentRegionAvail()
- * - Returns the ImVec2 size of the largest, unused rectangle in the window.
- *
- * GetCursorScreenPos()
- * - Returns the top left of the window.
- *
- * Add usable area to top left to get screen coordinates of bottom right.
- *
- * GetWindowSize()
- * - (Not what I want) Returns size of entire window including menu-bar and tab-bar
- */
-Rect get_empty_extents(void)
-{
-    ImVec2 sz = ImGui::GetContentRegionAvail();
-    ImVec2 tl = ImGui::GetCursorScreenPos();
-    ImVec2 br = {tl.x + sz.x, tl.y + sz.y};
-    return Rect {tl, br, sz};
-}
-///////////////////////
-// BADWOLF COLOR SCHEME as a Dear ImGui datatype
-///////////////////////
-namespace Colors
-{
-    /* *************Colors from Steve Losh badwolf.vim***************
-     *      _               _                 _  __
-     *     | |__   __ _  __| | __      _____ | |/ _|
-     *     | '_ \ / _` |/ _` | \ \ /\ / / _ \| | |_
-     *     | |_) | (_| | (_| |  \ V  V / (_) | |  _|
-     *     |_.__/ \__,_|\__,_|   \_/\_/ \___/|_|_|
-     * 
-     *      I am the Bad Wolf. I create myself.
-     *       I take the words. I scatter them in time and space.
-     *        A message to lead myself here.
-     * 
-     * A Vim colorscheme pieced together by Steve Losh.
-     * Available at http://stevelosh.com/projects/badwolf/
-     * *******************************/
-
-    // Greys
-    ImColor plain          = {0xf8,0xf6,0xf2,0xff};
-    ImColor snow           = {0xff,0xff,0xff,0xff};
-    ImColor coal           = {0x00,0x00,0x00,0xff};
-    ImColor brightgravel   = {0xd9,0xce,0xc3,0xff};
-    ImColor lightgravel    = {0x99,0x8f,0x84,0xff};
-    ImColor gravel         = {0x85,0x7f,0x78,0xff};
-    ImColor mediumgravel   = {0x66,0x64,0x62,0xff};
-    ImColor deepgravel     = {0x45,0x41,0x3b,0xff};
-    ImColor deepergravel   = {0x35,0x32,0x2d,0xff};
-    ImColor darkgravel     = {0x24,0x23,0x21,0xff};
-    ImColor blackgravel    = {0x1c,0x1b,0x1a,0xff};
-    ImColor blackestgravel = {0x14,0x14,0x13,0xff};
-
-    // Colors
-    ImColor dalespale      = {0xfa,0xde,0x3e,0xff};
-    ImColor dirtyblonde    = {0xf4,0xcf,0x86,0xff};
-    ImColor taffy          = {0xff,0x2c,0x4b,0xff};
-    ImColor saltwatertaffy = {0x8c,0xff,0xba,0xff};
-    ImColor tardis         = {0x0a,0x9d,0xff,0xff};
-    ImColor orange         = {0xff,0xa7,0x24,0xff};
-    ImColor lime           = {0xae,0xee,0x00,0xff};
-    ImColor dress          = {0xff,0x9e,0xb8,0xff};
-    ImColor toffee         = {0xb8,0x88,0x53,0xff};
-    ImColor coffee         = {0xc7,0x91,0x5b,0xff};
-    ImColor darkroast      = {0x88,0x63,0x3f,0xff};
-}
 
 //////////////////
 // DIAGRAM GLOBALS - declared in src/diagram.h
@@ -183,8 +122,8 @@ void Diagram::UI(void)
     /////////
     // UPDATE - use user input to modify the diagram
     /////////
-    // Define a 10x10 grid
-    /* int */ 
+    // Define an MxN grid
+    int M = 20, N = 10;
     ////////////
     // TRANSFORM - map items from diagram space to window space
     ////////////
@@ -208,6 +147,7 @@ void Diagram::UI(void)
             ImGui::Text("%d:Available space to draw: %.1f x %.1f\n",__LINE__, r.sz.x, r.sz.y);
             ImGui::Text("%d:Screen coordinates top-left: (%.1f, %.1f)\n",__LINE__, r.tl.x, r.tl.y);
             ImGui::Text("%d:Screen coordinates bottom-right: (%.1f, %.1f)\n",__LINE__, r.br.x, r.br.y);
+            ImGui::Text("%d:M x N grid : %d x %d\n",__LINE__, M, N);
         }
         // Show extents less the above text
         Rect r_less = get_empty_extents();
@@ -216,6 +156,7 @@ void Diagram::UI(void)
     { // Use drawing extents to draw grid lines across entire window
     }
     ImVec2 bl = {r.tl.x, r.br.y}; ImVec2 tr = {r.br.x, r.tl.y};
+    // TODO: change hardcoded step to calculated step based on grid dimensions
     for(float x=r.tl.x; x<=r.br.x; x += 32.0f)
     {
         ImVec2 t = {x,r.tl.y}; ImVec2 b = {x,r.br.y};
@@ -258,38 +199,25 @@ void Diagram::Debug(void)
     //////////
     // VERSION
     //////////
-    if(0)
-    { // Available space to draw
-        ImVec2 sz = ImGui::GetContentRegionAvail();
-        ImGui::Text("%d:Available space to draw: %.0f x %.0f",__LINE__, sz.x, sz.y);
+    if(1)
+    { // Version, OS window size
+        ImGui::Text("VERSION: Dear ImGui %s (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
+        ImGuiViewport* vp = ImGui::GetWindowViewport();
+        // vp->Size , vp->Pos
+        ImGui::Text("%d:OS window size: %.0f x %.0f",__LINE__, vp->Size.x, vp->Size.y);
     }
-    ImGui::Text("Dear ImGui %s (%d)", IMGUI_VERSION, IMGUI_VERSION_NUM);
-    ImGuiViewport* vp = ImGui::GetWindowViewport();
-    ImGui::Text("ImGui::GetWindowViewport()->Size is size of WHOLE application window");
-    ImGui::Text("%d:Application window size: %.0f x %.0f",__LINE__, vp->Size.x, vp->Size.y);
+    if(1)
+    { // window size (including menus and tabs)
+        ImVec2 sz = ImGui::GetWindowSize();
+        ImGui::Text("%d:THIS window size: %.0f x %.0f",__LINE__, sz.x, sz.y);
+    }
     /////////////
     // WHAT IS...
     /////////////
     /* ImDrawList* draw = ImGui::GetWindowDrawList(); */
     /* ImGui::Text("%d:sizeof(ImDrawList* draw): %d bytes", __LINE__, (int)sizeof(draw)); */
     if(0)
-    { // Size and screen coordinates of whole application window
-        ImGuiViewport* vp = ImGui::GetWindowViewport();
-        ImGui::Text("ImGui::GetWindowViewport()->Size is x,y size of whole application window");
-        // (0,0)
-        ImGui::Text("%d:viewport top-left: (%.0f,%.0f)",__LINE__, vp->Pos.x, vp->Pos.y);
-        ImGui::Text("%d:viewport size: %.0f x %.0f",__LINE__, vp->Size.x, vp->Size.y);
-        // (0 + Size.x, 0 + Size.y)
-        ImGui::Text("%d:viewport bottom-right: (%.0f,%.0f)",__LINE__, vp->Pos.x+vp->Size.x, vp->Pos.y+vp->Size.y);
-    }
-    if(1)
-    { // window size (including menus and tabs)
-        ImGui::Text("ImGui::GetWindowSize() returns size of THIS window");
-        ImVec2 sz = ImGui::GetWindowSize();
-        ImGui::Text("%d:window size: %.0f x %.0f",__LINE__, sz.x, sz.y);
-    }
-    if(0)
-    { // Get empty extents of THIS window: ImDrawList API uses screen coordinates!
+    { // Empty (availalable) area in THIS window
         // Viewport coordinates top-left
         ImVec2 tl = ImGui::GetCursorScreenPos();      // 
         ImGui::Text("%d:Screen position top-left: (%.1f, %.1f)\n",__LINE__, tl.x, tl.y);
@@ -297,6 +225,10 @@ void Diagram::Debug(void)
         // Viewport coordinates bottom-right
         ImVec2 br = {tl.x + sz.x, tl.y + sz.y};
         ImGui::Text("%d:Screen position bottom-right: (%.1f, %.1f)\n",__LINE__, br.x, br.y);
+        { // Did top left change? Yes
+            ImVec2 tl = ImGui::GetCursorScreenPos();      // 
+            ImGui::Text("%d:Screen position top-left: (%.1f, %.1f)\n",__LINE__, tl.x, tl.y);
+        }
     }
     if(0)
     { // not sure what Max tells me
