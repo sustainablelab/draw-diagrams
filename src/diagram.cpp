@@ -101,11 +101,14 @@ static void ShowMenu(void)
 ////////////////////////
 void Diagram::UI(void)
 {
-    // Set up this window with a menu-bar
+    ////////////////////
+    // SET UP WINDOW: UI
+    ////////////////////
     bool show_this_window = true;
-    ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar;
-    ImGui::Begin("Draw Diagrams", &show_this_window, flags);
-    ShowMenu();                                         // Add menu bar to this window
+    ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar;  // Window has a menu bar
+    ImGui::Begin("Draw Diagrams", &show_this_window, flags); // Create window
+    ShowMenu();                                         // Add my custom menu
+
     ///////
     // LOAD - latest state of diagram
     ///////
@@ -113,12 +116,34 @@ void Diagram::UI(void)
     /////////
     // UPDATE - use user input to modify the diagram
     /////////
-    // Define an MxN grid
-    int M = 20, N = 10;
+    // Define an MxN grid of line segments
+    int nrows = 20, ncols = 10;
+    constexpr int NROWS_MAX = 100, NCOLS_MAX = 100, NLINES_MAX = NROWS_MAX + NCOLS_MAX;
+    assert(nrows<=NROWS_MAX);
+    assert(ncols<=NCOLS_MAX);
+    /* std::vector<LineSeg> grid; */
+    LineSeg grid[NLINES_MAX]; int n=0;
+    for (int i=0; i<nrows; i++)
+    { // Walk rows (incrementing y)
+        float y = i; float end = ncols;
+        LineSeg l {ImVec2{0,y},ImVec2{end,y}};            // Horizontal lines
+        grid[n] = l; n++;
+        /* grid.push(l); */
+    }
+    for (int i=0; i<ncols; i++)
+    { // Walk columns (incrementing x)
+        float x = i; float end = nrows;
+        LineSeg l {ImVec2{x,0},ImVec2{x,end}};            // Vertical lines
+        grid[n] = l; n++;
+        /* grid.push(l); */
+    }
+    assert(n<=NLINES_MAX);
+
     ////////////
     // TRANSFORM - map items from diagram space to window space
     ////////////
     /* Rect r = get_empty_extents(); */
+
     /////////
     // RENDER - list the items to draw
     /////////
@@ -126,6 +151,7 @@ void Diagram::UI(void)
      * draw : Call draw->AddBlah() to draw Blah in this window
      */
     ImDrawList* draw = ImGui::GetWindowDrawList();
+
     /**
      * Draw diagonal lines to show empty area for drawing in.
      */
@@ -138,45 +164,41 @@ void Diagram::UI(void)
             ImGui::Text("%d:Available space to draw: %.1f x %.1f\n",__LINE__, r.sz.x, r.sz.y);
             ImGui::Text("%d:Screen coordinates top-left: (%.1f, %.1f)\n",__LINE__, r.tl.x, r.tl.y);
             ImGui::Text("%d:Screen coordinates bottom-right: (%.1f, %.1f)\n",__LINE__, r.br.x, r.br.y);
-            ImGui::Text("%d:M x N grid : %d x %d\n",__LINE__, M, N);
+            ImGui::Text("%d:M x N grid : %d x %d\n",__LINE__, nrows, ncols);
         }
         // Show extents less the above text
         Rect r_less = get_empty_extents();
         draw->AddLine(r_less.tl, r_less.br, Colors::deepgravel);
     }
     { // Use drawing extents to draw grid lines across entire window
+        ImVec2 bl = {r.tl.x, r.br.y}; ImVec2 tr = {r.br.x, r.tl.y};
+        // TODO: change hardcoded step to calculated step based on grid dimensions
+        for(float x=r.tl.x; x<=r.br.x; x += 32.0f)
+        {
+            ImVec2 t = {x,r.tl.y}; ImVec2 b = {x,r.br.y};
+            draw->AddLine(t, b, Colors::deepgravel);        // vertical line
+        }
+        draw->AddLine(r.tl, bl, Colors::lime);              // left most
+        draw->AddLine(tr, r.br, Colors::lime);              // right most
     }
-    ImVec2 bl = {r.tl.x, r.br.y}; ImVec2 tr = {r.br.x, r.tl.y};
-    // TODO: change hardcoded step to calculated step based on grid dimensions
-    for(float x=r.tl.x; x<=r.br.x; x += 32.0f)
-    {
-        ImVec2 t = {x,r.tl.y}; ImVec2 b = {x,r.br.y};
-        draw->AddLine(t, b, Colors::deepgravel);        // vertical line
-    }
-    draw->AddLine(r.tl, bl, Colors::lime);              // left most
-    draw->AddLine(tr, r.br, Colors::lime);              // right most
     if(0)
-    { // show_window_extents
-        ImVec2 sz = ImGui::GetWindowSize();
-        /* constexpr float STEP = 32.0f; */
-        ImVec2 p0 = {0,0}; ImVec2 p1 = {sz.x, sz.y};
-        draw->AddLine(p0, p1, Colors::deepgravel);
-    }
-    { // green box
-        ImVec2 topL = {128.f,128.f}; ImVec2 botR = {384.0f,256.0f};
-        draw->AddRect(topL,botR,Colors::saltwatertaffy, 10.0f, 0, 2.0f);
-    }
-    { // green box 2
-        ImVec2 topL = {448.f,128.f}; ImVec2 botR = {704.0f,256.0f};
-        draw->AddRect(topL,botR,Colors::saltwatertaffy, 10.0f, 0, 2.0f);
-    }
-    { // grey line
-        ImVec2 p0 = {384.f,192.f}; ImVec2 p1 = {448.0f,192.0f};
-        draw->AddLine(p0,p1,Colors::lightgravel, 2.0f);
-    }
-    { // orange box
-        ImVec2 topL = {128.f,256.f}; ImVec2 botR = {384.0f,384.0f};
-        draw->AddRect(topL,botR,Colors::orange, 10.0f, 0, 2.0f);
+    { // Placeholder examples of diagram artwork
+        { // green box
+            ImVec2 topL = {128.f,128.f}; ImVec2 botR = {384.0f,256.0f};
+            draw->AddRect(topL,botR,Colors::saltwatertaffy, 10.0f, 0, 2.0f);
+        }
+        { // green box 2
+            ImVec2 topL = {448.f,128.f}; ImVec2 botR = {704.0f,256.0f};
+            draw->AddRect(topL,botR,Colors::saltwatertaffy, 10.0f, 0, 2.0f);
+        }
+        { // grey line
+            ImVec2 p0 = {384.f,192.f}; ImVec2 p1 = {448.0f,192.0f};
+            draw->AddLine(p0,p1,Colors::lightgravel, 2.0f);
+        }
+        { // orange box
+            ImVec2 topL = {128.f,256.f}; ImVec2 botR = {384.0f,384.0f};
+            draw->AddRect(topL,botR,Colors::orange, 10.0f, 0, 2.0f);
+        }
     }
     ImGui::End();
 }

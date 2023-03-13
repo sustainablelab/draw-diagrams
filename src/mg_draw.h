@@ -27,6 +27,11 @@
 
 typedef struct
 {
+    ImVec2 a,b;                                         // LineSeg POINTS
+} LineSeg;
+
+typedef struct
+{
     ImVec2 tl;                                          // Rect TOP LEFT
     ImVec2 br;                                          // Rect BOTTOM RIGHT
     ImVec2 sz;                                          // Rect SIZE
